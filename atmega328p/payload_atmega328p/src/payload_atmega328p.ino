@@ -27,6 +27,9 @@ void loop() {
 	// Send the message (.write sends as bytes) 
 	Serial.write(buf, len);
 	
+	// slow down there young padawan
+	delay(500);
+	
 	comm_receive();
 }
 
