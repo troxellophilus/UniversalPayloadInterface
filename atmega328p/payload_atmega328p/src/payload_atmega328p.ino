@@ -2,14 +2,14 @@
 
 //#include <FastSerial.h>
 #include <mavlink.h>        // Mavlink interface
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 
 #define PAYLOAD_SYSTEM_ID 101 // System ID for MAVlink packets
 
+//FastSerialPort0(Serial); 
+
 int ledPin = A2;
 int received_heartbeat = 0;
-
-//FastSerialPort0(Serial); 
 
 void send_message(mavlink_message_t* msg)
 {
@@ -51,28 +51,18 @@ void loop() {
 	//mavlink_msg_mission_request_list_pack(PAYLOAD_SYSTEM_ID, component_id, &msg, MAV_TYPE_QUADROTOR, MAV_COMP_ID_ALL);
 
 	// Send the message (.write sends as bytes) 
-	delay(1000);
+	//delay(1000);
 	if (received_heartbeat) {
 		send_message(&msg);
+		delay(250);
 	}
 	
 	// slow down there young padawan
 	//delay(1000);
 
-	//mavlink_msg_mission_request_list_pack(PAYLOAD_SYSTEM_ID, component_id, &msg, MAV_TYPE_QUADROTOR, MAV_COMP_ID_ALL);
-
-	//len = mavlink_msg_to_send_buffer(buf, &msg);
-
-	//if (received_heartbeat)
-	//	Serial.write(buf, len);
-
-	//delay(1000);
-
-	while (Serial.available() < 5); // Wait for data to be available before trying to get it
+	//while (Serial.available() < 5); // Wait for data to be available before trying to get it
 	
 	comm_receive();
-
-	//delay(100);
 }
 
 void comm_receive() { 
@@ -85,12 +75,17 @@ void comm_receive() {
 
 		//try to get a new message 
 		if(mavlink_parse_char(0, c, &recv_msg, &recv_status)) { 
-
 			// Handle message
  			switch(recv_msg.msgid) {
 			        case MAVLINK_MSG_ID_HEARTBEAT:
-					digitalWrite(ledPin, HIGH);
-					received_heartbeat = 1;
+					if (!received_heartbeat) {
+						digitalWrite(ledPin, HIGH);
+						received_heartbeat = 1;
+					}
+					else {
+						digitalWrite(ledPin, LOW);
+						received_heartbeat = 0;
+					}
 			        	break;
 				case MAVLINK_MSG_ID_PARAM_VALUE:
 					break;
@@ -98,8 +93,10 @@ void comm_receive() {
 					//Do nothing
 				break;
 			}
+			delay(100);
 		} 
 		// And get the next one
 	}
+	delay(100);
 	digitalWrite(ledPin, LOW);
 }

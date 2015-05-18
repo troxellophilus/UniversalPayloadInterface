@@ -3,12 +3,22 @@
 
 
 
+.build/uno/src/MAVLink.cpp : src/MAVLink.ino
+	@mkdir -p .build/uno/src
+	@echo [93msrc/MAVLink.ino[0m
+	@/usr/local/bin/ino preproc  -o $@ $^
+
+.build/uno/src/mavtest.cpp : src/mavtest.ino
+	@mkdir -p .build/uno/src
+	@echo [93msrc/mavtest.ino[0m
+	@/usr/local/bin/ino preproc  -o $@ $^
+
 .build/uno/src/sketch.cpp : src/sketch.ino
 	@mkdir -p .build/uno/src
 	@echo [93msrc/sketch.ino[0m
 	@/usr/local/bin/ino preproc  -o $@ $^
 
 
-all : .build/uno/src/sketch.cpp
+all : .build/uno/src/MAVLink.cpp .build/uno/src/mavtest.cpp .build/uno/src/sketch.cpp
 	@true
 
