@@ -1,0 +1,67 @@
+Cmp-Mod V01 Genere par PcbNew le Mon 18 May 2015 01:11:35 AM PDT
+
+BeginCmp
+TimeStamp = 55582768
+Path = /55581036
+Reference = HEADER1;
+ValeurCmp = CONN_02X05;
+IdModule  = Pin_Headers:Pin_Header_Angled_2x05;
+EndCmp
+
+BeginCmp
+TimeStamp = 55582778
+Path = /55581526
+Reference = J1;
+ValeurCmp = RJ45;
+IdModule  = quadcopter_footprints:RJ45;
+EndCmp
+
+BeginCmp
+TimeStamp = 5558277D
+Path = /5558361D
+Reference = MAG1;
+ValeurCmp = CONN_01X01;
+IdModule  = quadcopter_footprints:8mmMagnet;
+EndCmp
+
+BeginCmp
+TimeStamp = 55582782
+Path = /555835E3
+Reference = MAG2;
+ValeurCmp = CONN_01X01;
+IdModule  = quadcopter_footprints:8mmMagnet;
+EndCmp
+
+BeginCmp
+TimeStamp = 55582787
+Path = /555833C6
+Reference = MAG3;
+ValeurCmp = CONN_01X01;
+IdModule  = quadcopter_footprints:8mmMagnet;
+EndCmp
+
+BeginCmp
+TimeStamp = 5558278C
+Path = /55583589
+Reference = MAG4;
+ValeurCmp = CONN_01X01;
+IdModule  = quadcopter_footprints:8mmMagnet;
+EndCmp
+
+BeginCmp
+TimeStamp = 5558677B
+Path = /555811EF
+Reference = POGO1;
+ValeurCmp = CONN_02X05;
+IdModule  = quadcopter_footprints:Pin_Header_Straight_2x05_SMD;
+EndCmp
+
+BeginCmp
+TimeStamp = 55586789
+Path = /55581191
+Reference = POGO2;
+ValeurCmp = CONN_02X05;
+IdModule  = quadcopter_footprints:Pin_Header_Straight_2x05_SMD;
+EndCmp
+
+EndListe

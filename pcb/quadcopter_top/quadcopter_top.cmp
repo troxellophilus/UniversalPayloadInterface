@@ -1,0 +1,87 @@
+Cmp-Mod V01 Created by Cvpcb (after 2015-may-01 BZR unknown)-product   date = Mon 18 May 2015 02:04:37 AM PDT
+
+BeginCmp
+TimeStamp = /5559BDC1;
+Reference = D1;
+ValeurCmp = LED;
+IdModule  = LEDs:LED-0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /5559BB18;
+Reference = HEADER1;
+ValeurCmp = CONN_02X05;
+IdModule  = Pin_Headers:Pin_Header_Angled_2x05;
+EndCmp
+
+BeginCmp
+TimeStamp = /5559BB13;
+Reference = HEADER2;
+ValeurCmp = CONN_02X05;
+IdModule  = Pin_Headers:Pin_Header_Angled_2x05;
+EndCmp
+
+BeginCmp
+TimeStamp = /5559BB0B;
+Reference = IC1;
+ValeurCmp = ATMEGA328P-A;
+IdModule  = quadcopter_footprints:TQFP32_08;
+EndCmp
+
+BeginCmp
+TimeStamp = /5559BB0C;
+Reference = J1;
+ValeurCmp = RJ45;
+IdModule  = quadcopter_footprints:RJ45;
+EndCmp
+
+BeginCmp
+TimeStamp = /555980BF;
+Reference = MAG1;
+ValeurCmp = CONN_01X01;
+IdModule  = quadcopter_footprints:8mmMagnet;
+EndCmp
+
+BeginCmp
+TimeStamp = /5559803B;
+Reference = MAG2;
+ValeurCmp = CONN_01X01;
+IdModule  = quadcopter_footprints:8mmMagnet;
+EndCmp
+
+BeginCmp
+TimeStamp = /55597F82;
+Reference = MAG3;
+ValeurCmp = CONN_01X01;
+IdModule  = quadcopter_footprints:8mmMagnet;
+EndCmp
+
+BeginCmp
+TimeStamp = /55597FBB;
+Reference = MAG4;
+ValeurCmp = CONN_01X01;
+IdModule  = quadcopter_footprints:8mmMagnet;
+EndCmp
+
+BeginCmp
+TimeStamp = /5559BB0D;
+Reference = POGO1;
+ValeurCmp = CONN_02X05;
+IdModule  = quadcopter_footprints:Pin_Header_Straight_2x05_SMD;
+EndCmp
+
+BeginCmp
+TimeStamp = /5559BB10;
+Reference = POGO2;
+ValeurCmp = CONN_02X05;
+IdModule  = quadcopter_footprints:Pin_Header_Straight_2x05_SMD;
+EndCmp
+
+BeginCmp
+TimeStamp = /5559C18D;
+Reference = R1;
+ValeurCmp = R;
+IdModule  = Resistors_SMD:R_0805;
+EndCmp
+
+EndListe
