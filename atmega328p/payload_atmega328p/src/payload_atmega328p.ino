@@ -1,25 +1,30 @@
-// Arduino MAVLink test code.
+/*
+ * Universal Payload Interface
+ * Arduino MAVLink Code
+ */
 
+/* Make sure this is included before Arduino's HardwareSerial */
 #include <FastSerial.h>
-//#define MAVLINK_CHECK_MESSAGE_LENGTH
+
+/* Make sure this is defined before including mavlink.h */
 #define MAVLINK_COMM_NUM_BUFFERS 1
-#include <mavlink.h>        // Mavlink interface
+#include <mavlink.h>
 
 #define PAYLOAD_SYSTEM_ID 101 // System ID for MAVlink packets
 
-FastSerialPort0(Serial); 
+FastSerialPort0(Serial); // Required for FastSerial
 
 int ledPin = A2;
 int received_heartbeat = 0;
 
-void send_message(mavlink_message_t* msg)
-{
-  uint8_t buf[MAVLINK_MAX_PACKET_LEN];
-  
-  uint16_t len = mavlink_msg_to_send_buffer(buf, msg);
-  for(uint16_t i = 0; i < len; i++) {
-    Serial.write(buf[i]);
-  }
+void send_message(mavlink_message_t* msg) {
+	uint8_t buf[MAVLINK_MAX_PACKET_LEN];
+
+	uint16_t len = mavlink_msg_to_send_buffer(buf, msg);
+
+	for(uint16_t i = 0; i < len; i++) {
+		Serial.write(buf[i]);
+	}
 }
 
 void setup() {
