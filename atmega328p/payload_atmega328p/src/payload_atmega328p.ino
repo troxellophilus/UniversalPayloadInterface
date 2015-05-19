@@ -1,12 +1,13 @@
 // Arduino MAVLink test code.
 
-//#include <FastSerial.h>
+#include <FastSerial.h>
+//#define MAVLINK_CHECK_MESSAGE_LENGTH
+#define MAVLINK_COMM_NUM_BUFFERS 1
 #include <mavlink.h>        // Mavlink interface
-//#include <SoftwareSerial.h>
 
 #define PAYLOAD_SYSTEM_ID 101 // System ID for MAVlink packets
 
-//FastSerialPort0(Serial); 
+FastSerialPort0(Serial); 
 
 int ledPin = A2;
 int received_heartbeat = 0;
@@ -15,33 +16,24 @@ void send_message(mavlink_message_t* msg)
 {
   uint8_t buf[MAVLINK_MAX_PACKET_LEN];
   
-//  Serial.write(MAVLINK_STX);
-//  Serial.write(msg->len);
-//  Serial.write(msg->seq);
-//  Serial.write(msg->sysid);
-//  Serial.write(msg->compid);
-//  Serial.write(msg->msgid);
   uint16_t len = mavlink_msg_to_send_buffer(buf, msg);
-  for(uint16_t i = 0; i < len; i++)
-  {
+  for(uint16_t i = 0; i < len; i++) {
     Serial.write(buf[i]);
   }
-//  Serial.write(msg->ck_a);
-//  Serial.write(msg->ck_b);
 }
 
 void setup() {
-	Serial.begin(57600);
 	pinMode(ledPin, OUTPUT);
+	Serial.begin(57600);
 }
 
 void loop() { 
 	// Define the system type (see mavlink_types.h for list of possible types) 
 	int system_type = MAV_TYPE_ONBOARD_CONTROLLER;
-	int autopilot_type = MAV_AUTOPILOT_ARDUPILOTMEGA;
+	int autopilot_type = MAV_AUTOPILOT_GENERIC;
 	int component_id = 101; //MAV_COMP_ID_PAYLOAD;
-	int base_mode = MAV_MODE_FLAG_TEST_ENABLED;
-	int sys_status = MAV_STATE_STANDBY;
+	int base_mode = MAV_MODE_FLAG_STABILIZE_ENABLED;
+	int sys_status = MAV_STATE_UNINIT;
 	
 	// Initialize the required buffers 
 	mavlink_message_t msg; 
@@ -51,21 +43,21 @@ void loop() {
 	//mavlink_msg_mission_request_list_pack(PAYLOAD_SYSTEM_ID, component_id, &msg, MAV_TYPE_QUADROTOR, MAV_COMP_ID_ALL);
 
 	// Send the message (.write sends as bytes) 
-	//delay(1000);
+	delay(500);
 	if (received_heartbeat) {
+		digitalWrite(ledPin, HIGH);
 		send_message(&msg);
-		delay(250);
+		received_heartbeat = 0;
+		delay(500);
+		digitalWrite(ledPin, LOW);
 	}
-	
-	// slow down there young padawan
-	//delay(1000);
-
-	//while (Serial.available() < 5); // Wait for data to be available before trying to get it
 	
 	comm_receive();
 }
 
 void comm_receive() { 
+	int i = 0;
+	int frames = 0;
 	mavlink_message_t recv_msg; 
 	mavlink_status_t recv_status;
 	
@@ -75,16 +67,17 @@ void comm_receive() {
 
 		//try to get a new message 
 		if(mavlink_parse_char(0, c, &recv_msg, &recv_status)) { 
+			frames++;
+			received_heartbeat = 1;
 			// Handle message
  			switch(recv_msg.msgid) {
 			        case MAVLINK_MSG_ID_HEARTBEAT:
+					mavlink_heartbeat_t hb;
+					mavlink_msg_heartbeat_decode(&recv_msg, &hb);
+					// do something with it
+
 					if (!received_heartbeat) {
-						digitalWrite(ledPin, HIGH);
 						received_heartbeat = 1;
-					}
-					else {
-						digitalWrite(ledPin, LOW);
-						received_heartbeat = 0;
 					}
 			        	break;
 				case MAVLINK_MSG_ID_PARAM_VALUE:
@@ -93,10 +86,13 @@ void comm_receive() {
 					//Do nothing
 				break;
 			}
-			delay(100);
 		} 
+		if (i > 64 || frames > 10) {
+			break;
+		}
+		delayMicroseconds(200);
+		i++;
 		// And get the next one
 	}
-	delay(100);
-	digitalWrite(ledPin, LOW);
+	//delay(50);
 }

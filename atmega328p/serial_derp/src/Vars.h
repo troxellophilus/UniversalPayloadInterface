@@ -93,9 +93,9 @@
  static boolean      mavbeat = 0;
  static float        lastMAVBeat = 0;
  static boolean      waitingMAVBeats = 1;
- static uint8_t      apm_mav_type;
- static int8_t      apm_mav_system; 
- static uint8_t      apm_mav_component;
+ static uint8_t      apm_mav_type = MAV_TYPE_QUADROTOR;
+ static int8_t      apm_mav_system = 20; 
+ static uint8_t      apm_mav_component = 101;
  static boolean      enable_mav_request = 0;
 
 static char LastMessage[LCDMaxPos];

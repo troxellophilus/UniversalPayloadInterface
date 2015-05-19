@@ -8,6 +8,8 @@
 #include "../GCS_MAVLink/include/mavlink/v1.0/mavlink_types.h"
 #include "../GCS_MAVLink/include/mavlink/v1.0/ardupilotmega/mavlink.h"
 
+#include "Vars.h"
+
 // true when we have received at least 1 MAVLink packet
 static bool mavlink_active;
 static uint8_t crlf_count = 0;
@@ -21,6 +23,7 @@ boolean getBit(byte Reg, byte whichBit) {
     return State;
 }  
 
+/*
 void request_mavlink_rates()
 {
     const int  maxStreams = 6;
@@ -37,6 +40,7 @@ void request_mavlink_rates()
             MAVStreams[i], MAVRates[i], 1);
     }
 }
+*/
 
 void read_mavlink(int maxframes){
     mavlink_message_t msg; 
@@ -119,9 +123,9 @@ void read_mavlink(int maxframes){
             case MAVLINK_MSG_ID_ATTITUDE:
                 {
                   Serial.println("atti");
-                    osd_pitch = ToDeg(mavlink_msg_attitude_get_pitch(&msg));
-                    osd_roll = ToDeg(mavlink_msg_attitude_get_roll(&msg));
-                    osd_yaw = ToDeg(mavlink_msg_attitude_get_yaw(&msg));
+                    //osd_pitch = ToDeg(mavlink_msg_attitude_get_pitch(&msg));
+                    //osd_roll = ToDeg(mavlink_msg_attitude_get_roll(&msg));
+                    //osd_yaw = ToDeg(mavlink_msg_attitude_get_yaw(&msg));
                   //Serial.print(osd_pitch);  Serial.print("  / ");Serial.print(osd_roll);  Serial.print("  / ");Serial.println(osd_yaw); 
                 }
                 break;
