@@ -1,0 +1,342 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:quadcopter_mate-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L CONN_02X05 HEADER1
+U 1 1 55581036
+P 5100 3850
+F 0 "HEADER1" H 5100 4150 50  0000 C CNN
+F 1 "CONN_02X05" H 5100 3550 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Angled_2x05" H 5100 2650 60  0001 C CNN
+F 3 "" H 5100 2650 60  0000 C CNN
+	1    5100 3850
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_02X05 POGO2
+U 1 1 55581191
+P 7900 3200
+F 0 "POGO2" H 7900 3500 50  0000 C CNN
+F 1 "CONN_02X05" H 7900 2900 50  0000 C CNN
+F 2 "quadcopter_footprints:Pin_Header_Straight_2x05_SMD" H 7900 2000 60  0001 C CNN
+F 3 "" H 7900 2000 60  0000 C CNN
+	1    7900 3200
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_02X05 POGO1
+U 1 1 555811EF
+P 5100 3000
+F 0 "POGO1" H 5100 3300 50  0000 C CNN
+F 1 "CONN_02X05" H 5100 2700 50  0000 C CNN
+F 2 "quadcopter_footprints:Pin_Header_Straight_2x05_SMD" H 5100 1800 60  0001 C CNN
+F 3 "" H 5100 1800 60  0000 C CNN
+	1    5100 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L RJ45 J1
+U 1 1 55581526
+P 7850 1950
+F 0 "J1" H 8050 2450 60  0000 C CNN
+F 1 "RJ45" H 7700 2450 60  0000 C CNN
+F 2 "quadcopter_footprints:RJ45" H 7850 1950 60  0001 C CNN
+F 3 "" H 7850 1950 60  0000 C CNN
+	1    7850 1950
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR01
+U 1 1 5558122F
+P 7500 3450
+F 0 "#PWR01" H 7500 3200 50  0001 C CNN
+F 1 "GND" H 7500 3300 50  0000 C CNN
+F 2 "" H 7500 3450 60  0000 C CNN
+F 3 "" H 7500 3450 60  0000 C CNN
+	1    7500 3450
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR02
+U 1 1 55581EA0
+P 8300 3450
+F 0 "#PWR02" H 8300 3300 50  0001 C CNN
+F 1 "+5V" H 8300 3590 50  0000 C CNN
+F 2 "" H 8300 3450 60  0000 C CNN
+F 3 "" H 8300 3450 60  0000 C CNN
+	1    8300 3450
+	-1   0    0    1   
+$EndComp
+$Comp
+L CONN_01X01 MAG3
+U 1 1 555833C6
+P 4800 1300
+F 0 "MAG3" H 4800 1400 50  0000 C CNN
+F 1 "CONN_01X01" V 4900 1300 50  0000 C CNN
+F 2 "quadcopter_footprints:8mmMagnet" H 4800 1300 60  0001 C CNN
+F 3 "" H 4800 1300 60  0000 C CNN
+	1    4800 1300
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_01X01 MAG4
+U 1 1 55583589
+P 4800 1850
+F 0 "MAG4" H 4800 1950 50  0000 C CNN
+F 1 "CONN_01X01" V 4900 1850 50  0000 C CNN
+F 2 "quadcopter_footprints:8mmMagnet" H 4800 1850 60  0001 C CNN
+F 3 "" H 4800 1850 60  0000 C CNN
+	1    4800 1850
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_01X01 MAG2
+U 1 1 555835E3
+P 3900 1850
+F 0 "MAG2" H 3900 1950 50  0000 C CNN
+F 1 "CONN_01X01" V 4000 1850 50  0000 C CNN
+F 2 "quadcopter_footprints:8mmMagnet" H 3900 1850 60  0001 C CNN
+F 3 "" H 3900 1850 60  0000 C CNN
+	1    3900 1850
+	-1   0    0    1   
+$EndComp
+$Comp
+L CONN_01X01 MAG1
+U 1 1 5558361D
+P 3900 1300
+F 0 "MAG1" H 3900 1400 50  0000 C CNN
+F 1 "CONN_01X01" V 4000 1300 50  0000 C CNN
+F 2 "quadcopter_footprints:8mmMagnet" H 3900 1300 60  0001 C CNN
+F 3 "" H 3900 1300 60  0000 C CNN
+	1    3900 1300
+	-1   0    0    1   
+$EndComp
+$Comp
+L GND #PWR03
+U 1 1 5558364B
+P 4350 1950
+F 0 "#PWR03" H 4350 1700 50  0001 C CNN
+F 1 "GND" H 4350 1800 50  0000 C CNN
+F 2 "" H 4350 1950 60  0000 C CNN
+F 3 "" H 4350 1950 60  0000 C CNN
+	1    4350 1950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5350 2800 5900 2800
+Wire Wire Line
+	5900 2800 5900 3650
+Wire Wire Line
+	5900 3650 5350 3650
+Wire Wire Line
+	5350 2900 5800 2900
+Wire Wire Line
+	5800 2900 5800 3750
+Wire Wire Line
+	5800 3750 5350 3750
+Wire Wire Line
+	5350 3000 5700 3000
+Wire Wire Line
+	5700 3000 5700 3850
+Wire Wire Line
+	5700 3850 5350 3850
+Wire Wire Line
+	5350 3100 5550 3100
+Wire Wire Line
+	5550 3100 5550 3950
+Wire Wire Line
+	5550 3950 5350 3950
+Wire Wire Line
+	5350 3200 5450 3200
+Wire Wire Line
+	5450 3200 5450 4050
+Wire Wire Line
+	5450 4050 5350 4050
+Wire Wire Line
+	4850 2800 4300 2800
+Wire Wire Line
+	4300 2800 4300 3650
+Wire Wire Line
+	4300 3650 4850 3650
+Wire Wire Line
+	4850 2900 4450 2900
+Wire Wire Line
+	4450 2900 4450 3750
+Wire Wire Line
+	4450 3750 4850 3750
+Wire Wire Line
+	4850 3000 4550 3000
+Wire Wire Line
+	4550 3000 4550 3850
+Wire Wire Line
+	4550 3850 4850 3850
+Wire Wire Line
+	4850 3100 4650 3100
+Wire Wire Line
+	4650 3100 4650 3950
+Wire Wire Line
+	4650 3950 4850 3950
+Wire Wire Line
+	4850 3200 4750 3200
+Wire Wire Line
+	4750 3200 4750 4050
+Wire Wire Line
+	4750 4050 4850 4050
+Wire Wire Line
+	4350 1300 4350 1950
+Connection ~ 4350 1300
+Connection ~ 4350 1850
+$Comp
+L GND #PWR04
+U 1 1 555849FD
+P 6100 2900
+F 0 "#PWR04" H 6100 2650 50  0001 C CNN
+F 1 "GND" H 6100 2750 50  0000 C CNN
+F 2 "" H 6100 2900 60  0000 C CNN
+F 3 "" H 6100 2900 60  0000 C CNN
+	1    6100 2900
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR05
+U 1 1 55585945
+P 4050 2950
+F 0 "#PWR05" H 4050 2800 50  0001 C CNN
+F 1 "+5V" H 4050 3090 50  0000 C CNN
+F 2 "" H 4050 2950 60  0000 C CNN
+F 3 "" H 4050 2950 60  0000 C CNN
+	1    4050 2950
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	7650 3400 7500 3400
+Wire Wire Line
+	7500 3400 7500 3450
+Wire Wire Line
+	8150 3400 8300 3400
+Wire Wire Line
+	8300 3400 8300 3450
+Wire Wire Line
+	7600 2400 7600 2650
+Wire Wire Line
+	7600 2650 8350 2650
+Wire Wire Line
+	8350 2650 8350 3300
+Wire Wire Line
+	8350 3300 8150 3300
+Wire Wire Line
+	7800 2400 7800 2600
+Wire Wire Line
+	7800 2600 8400 2600
+Wire Wire Line
+	8400 2600 8400 3200
+Wire Wire Line
+	8400 3200 8150 3200
+Wire Wire Line
+	8000 2400 8000 2750
+Wire Wire Line
+	8000 2750 8300 2750
+Wire Wire Line
+	8300 2750 8300 3100
+Wire Wire Line
+	8300 3100 8150 3100
+Wire Wire Line
+	8200 2400 8200 3000
+Wire Wire Line
+	8200 3000 8150 3000
+Wire Wire Line
+	7500 2400 7500 3300
+Wire Wire Line
+	7500 3300 7650 3300
+Wire Wire Line
+	7700 2400 7700 2750
+Wire Wire Line
+	7700 2750 7400 2750
+Wire Wire Line
+	7400 2750 7400 3200
+Wire Wire Line
+	7400 3200 7650 3200
+Wire Wire Line
+	7900 2400 7900 2800
+Wire Wire Line
+	7900 2800 7600 2800
+Wire Wire Line
+	7600 2800 7600 3100
+Wire Wire Line
+	7600 3100 7650 3100
+Wire Wire Line
+	8100 2400 8100 2850
+Wire Wire Line
+	8100 2850 7650 2850
+Wire Wire Line
+	7650 2850 7650 3000
+Wire Wire Line
+	6100 2900 5900 2900
+Connection ~ 5900 2900
+Wire Wire Line
+	4050 2950 4050 2900
+Wire Wire Line
+	4050 2900 4300 2900
+Connection ~ 4300 2900
+Wire Wire Line
+	4100 1850 4600 1850
+Wire Wire Line
+	4100 1300 4600 1300
+$Comp
+L GND #PWR?
+U 1 1 55587CCE
+P 8550 1750
+F 0 "#PWR?" H 8550 1500 50  0001 C CNN
+F 1 "GND" H 8550 1600 50  0000 C CNN
+F 2 "" H 8550 1750 60  0000 C CNN
+F 3 "" H 8550 1750 60  0000 C CNN
+	1    8550 1750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8400 1600 8550 1600
+Wire Wire Line
+	8550 1600 8550 1750
+$EndSCHEMATC
