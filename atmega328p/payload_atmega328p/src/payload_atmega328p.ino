@@ -1,6 +1,6 @@
 /*
  * Universal Payload Interface
- * Arduino MAVLink Code
+ * Atmega328p MAVLink Code
  */
 
 /* Make sure this is included before Arduino's HardwareSerial */
@@ -12,42 +12,39 @@
 
 #define PAYLOAD_SYSTEM_ID 101 // System ID for MAVlink packets
 
-FastSerialPort0(Serial); // Required for FastSerial
+#define STANDBY    0
+#define FLASH_LED  1
 
-int ledPin = A2;
-int received_heartbeat = 0;
+FastSerialPort0(Serial); // Required for FastSerial
 
 // System Status Variables
 uint8_t  mavlink_connected = 0;
+uint8_t  pl_state = STANDBY;
 uint16_t hb_count = 0;
 uint32_t led_pin = A2;
+
+// Payload identifiers
+uint8_t  pl_system_id = 0;
+uint8_t  pl_component_id = 0;
+
+// APM identifiers
+uint8_t  mav_system_id = 0;
+uint8_t  mav_component_id = 0;
 
 // *************************
 // MAVLINK MESSAGE VARIABLES
 
 // Heartbeat (msg id 1)
-uint32_t mav_custom_mode = 0;
 uint8_t  mav_type = 0;
 uint8_t  mav_autopilot = 0;
 uint8_t  mav_base_mode = 0;
 uint8_t  mav_system_status = 0;
-uint8_t  mav_mavlink_version = 0;
 
-// GPS Raw Int (msg id 24)
-int32_t  mav_latitude = 0;
-int32_t  mav_longitude = 0;
-int32_t  mav_altitude = 0;
-uint16_t mav_velocity = 0;
-uint8_t  mav_fix_type = 0;
-uint8_t  mav_sat_visible = 0;
+// Mission Current (msg id 42)
+uint16_t mav_seq = 0;
 
-// VFR HUD (msg id 74)
-int32_t  mav_airspeed = 0;
-uint32_t mav_groundspeed = 0;
-uint32_t mav_altitude = 0;
-uint32_t mav_climb = 0;
-int16_t  mav_heading = 0;
-uint16_t mav_throttle = 0;
+// *************************
+// MESSAGE SEND HELPERS
 
 void send_message(mavlink_message_t* msg) {
 	uint8_t buf[MAVLINK_MAX_PACKET_LEN];
@@ -72,32 +69,104 @@ void send_heartbeat() {
 	
 	// Setup the heartbeat message
 	mavlink_msg_heartbeat_pack(PAYLOAD_SYSTEM_ID, component_id, &msg, system_type, autopilot_type, base_mode, 0, sys_status);
-	//mavlink_msg_mission_request_list_pack(PAYLOAD_SYSTEM_ID, component_id, &msg, MAV_TYPE_QUADROTOR, MAV_COMP_ID_ALL);
 
 	send_message(&msg);
 }
 
+void send_set_waypoint(uint16_t wp) {
+	mavlink_message_t msg;
+	mavlink_mission_set_current_t set_point;
+
+	set_point.seq = wp;
+	set_point.target_system = mav_system_id;
+	set_point.target_component = mav_component_id;
+
+	mavlink_msg_mission_set_current_encode(pl_system_id, pl_component_id, &msg, &set_point);
+
+	send_message(&msg);
+}
+
+// ************************
+// PAYLOAD UPDATE FUNCTIONS
+void pl_update() {
+	static uint16_t frames = 0;
+	static int wp = 0;
+
+	// Run payload state machine
+	switch (pl_state) {
+		case STANDBY:
+			// Send command every so often
+			if (frames % 1000 == 0) {
+				send_set_waypoint(wp);
+				wp++;
+				if (wp > 3)
+					wp = 0;
+			}
+			digitalWrite(led_pin, HIGH);
+			break;
+		case FLASH_LED:
+			static int timer = 0;
+
+			if (frames % 10 == 0) {
+				if (digitalRead(led_pin) == HIGH)
+					digitalWrite(led_pin, LOW);
+				else
+					digitalWrite(led_pin, HIGH);
+			}
+
+			if (timer++ > 100)
+				pl_state = STANDBY;
+			break;
+	}
+	//delay(100);
+
+	frames++;
+}
+
+// ************************
+// MAIN LOOP
+
 void setup() {
-	pinMode(ledPin, OUTPUT);
+	pinMode(led_pin, OUTPUT);
 	Serial.begin(57600);
 }
 
 void loop() { 
 	// Received 5 heartbeats, connection confirmed
-	if (hb_count > 5) {
+	if (hb_count == 5) {
 		mavlink_connected = 1;
-		digitalWrite(ledPin, HIGH);
 	}
+
+	// If we don't hear from the mav for a while, assume we lost connection
+	static uint32_t loss = 0;
+	static int hb_last = hb_count;
+	if (hb_count == hb_last) {
+		loss++;
+		if (loss > 50000) {
+			mavlink_connected = 0;
+			digitalWrite(led_pin, LOW);
+			loss = 0;
+			hb_count = 0;
+		}
+	}
+	else {
+		loss = 0;
+		digitalWrite(led_pin, HIGH);
+	}
+	hb_last = hb_count;
 
 	// Do things if we are connected
 	if (mavlink_connected > 0)
-		send_heartbeat();
+		pl_update();
 	
 	// Receive messages and handle them
 	comm_receive();
 }
 
-void comm_receive() { 
+// ************************
+// MESSAGE RECEIVE HELPERS
+
+void comm_receive() {
 	int i = 0;
 	int frames = 0;
 	mavlink_message_t recv_msg; 
@@ -110,15 +179,20 @@ void comm_receive() {
 		//try to get a new message 
 		if(mavlink_parse_char(0, c, &recv_msg, &recv_status)) { 
 			frames++;
+			
+			// Update system and component id
+			mav_system_id = recv_msg.sysid;
+			mav_component_id = recv_msg.compid;
+
 			// Handle message
  			switch(recv_msg.msgid) {
 			        case MAVLINK_MSG_ID_HEARTBEAT:
-					hb_count++;
+					handle_heartbeat(&recv_msg);
 			        	break;
-				case MAVLINK_MSG_ID_PARAM_VALUE:
+				case MAVLINK_MSG_ID_MISSION_CURRENT:
+					handle_mission_current(&recv_msg);
 					break;
 				default:
-					//Do nothing
 				break;
 			}
 		} 
@@ -128,4 +202,17 @@ void comm_receive() {
 		delayMicroseconds(200);
 		i++;
 	}
+}
+
+void handle_heartbeat(mavlink_message_t *msg) {
+	hb_count++;
+	mav_type = mavlink_msg_heartbeat_get_type(msg);
+	mav_autopilot = mavlink_msg_heartbeat_get_autopilot(msg);
+	mav_base_mode = mavlink_msg_heartbeat_get_base_mode(msg);
+	mav_system_status = mavlink_msg_heartbeat_get_system_status(msg);
+}
+
+void handle_mission_current(mavlink_message_t *msg) {
+	mav_seq = mavlink_msg_mission_current_get_seq(msg);
+	pl_state = FLASH_LED;
 }
