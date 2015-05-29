@@ -12,14 +12,18 @@
 
 #define PAYLOAD_SYSTEM_ID 101 // System ID for MAVlink packets
 
-#define STANDBY    0
-#define FLASH_LED  1
+#define NUM_WP 3 // the number of waypoints we will send to the mav
+
+#define PL_STATE_DISCONNECTED       0
+#define PL_STATE_CONNECTED          1
+#define PL_STATE_FLASH_LED          2
+#define PL_STATE_SEND_WAYPOINTS     3
 
 FastSerialPort0(Serial); // Required for FastSerial
 
 // System Status Variables
 uint8_t  mavlink_connected = 0;
-uint8_t  pl_state = STANDBY;
+uint8_t  pl_state = PL_STATE_DISCONNECTED;
 uint16_t hb_count = 0;
 uint32_t led_pin = 13;
 
@@ -30,6 +34,11 @@ uint8_t  pl_component_id = 0;
 // APM identifiers
 uint8_t  mav_system_id = 0;
 uint8_t  mav_component_id = 0;
+
+// Waypoint Variables
+uint8_t  wp_count_sent = 0;
+uint8_t  wp_request_seq = -1;
+mavlink_mission_item_t pl_waypoints[NUM_WP];
 
 // *************************
 // MAVLINK MESSAGE VARIABLES
@@ -86,78 +95,180 @@ void send_set_waypoint(uint16_t wp) {
 	send_message(&msg);
 }
 
+void send_waypoint_count(uint16_t c) {
+	mavlink_message_t msg;
+	mavlink_mission_count_t wp_count;
+
+	wp_count.count = c;
+	wp_count.target_system = mav_system_id;
+	wp_count.target_component = mav_component_id;
+
+	mavlink_msg_mission_count_encode(pl_system_id, pl_component_id, &msg, &wp_count);
+
+	send_message(&msg);
+}
+
+void send_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, uint8_t cur) {
+	mavlink_message_t msg;
+	mavlink_mission_item_t waypoint;
+
+	waypoint.param1 = 0;
+	waypoint.param2 = 0;
+	waypoint.param3 = 0;
+	waypoint.param4 = 0;
+	waypoint.x = lat;
+	waypoint.y = lon;
+	waypoint.z = alt;
+	waypoint.seq = seq;
+	waypoint.command = com;
+	waypoint.target_system = mav_system_id;
+	waypoint.target_component = mav_component_id;
+	waypoint.frame = MAV_FRAME_LOCAL_NED;
+	waypoint.current = cur;
+	waypoint.autocontinue = 1;
+
+	mavlink_msg_mission_item_encode(pl_system_id, pl_component_id, &msg, &waypoint);
+
+	send_message(&msg);
+}
+
+void send_clear_waypoints() {
+	mavlink_message_t msg;
+	mavlink_mission_clear_all_t wp_clear;
+
+	wp_clear.target_system = mav_system_id;
+	wp_clear.target_component = mav_component_id;
+
+	mavlink_msg_mission_clear_all_encode(pl_system_id, pl_component_id, &msg, &wp_clear);
+
+	send_message(&msg);
+}
+
 // ************************
 // PAYLOAD UPDATE FUNCTIONS
+
 void pl_update() {
 	static uint16_t frames = 0;
-	static int wp = 0;
 
 	// Run payload state machine
 	switch (pl_state) {
-		case STANDBY:
-			// Send command every so often
-			//if (frames % 1000 == 0) {
-				send_set_waypoint(wp);
-				wp++;
-				if (wp > 3)
-					wp = 0;
-			//}
-			digitalWrite(led_pin, HIGH);
+		case PL_STATE_DISCONNECTED:
+			digitalWrite(led_pin, LOW);
+
+			// Received 10 heartbeats, connection confirmed
+			if (hb_count == 10) {
+				pl_state = PL_STATE_CONNECTED;
+			}
+
+			// while a connection hasn't been established, do nothing
 			break;
-		case FLASH_LED:
+		case PL_STATE_CONNECTED:
+			digitalWrite(led_pin, HIGH);
+
+			if (wp_count_sent == 0) {
+				// allow the autopilot to warm up
+				delay(5000);
+
+				// clear out any waypoints already on the autopilot
+				send_clear_waypoints();
+
+				pl_state = PL_STATE_SEND_WAYPOINTS;
+				wp_count_sent = 1;
+			}
+			break;
+		case PL_STATE_FLASH_LED:
 			static int timer = 0;
 
-			if (frames % 10 == 0) {
+			if (frames % 50 == 0) {
 				if (digitalRead(led_pin) == HIGH)
 					digitalWrite(led_pin, LOW);
 				else
 					digitalWrite(led_pin, HIGH);
 			}
 
-			if (timer++ > 100)
-				pl_state = STANDBY;
+			if (timer++ > 300)
+				pl_state = PL_STATE_CONNECTED;
+			break;
+		case PL_STATE_SEND_WAYPOINTS:
+			static unsigned long last_time = millis();
+			static uint8_t last_seq = 0;
+			static uint8_t timeout = 0;
+
+			if (wp_request_seq == last_seq && last_time - millis() >= 1000) {
+				last_time = millis();
+				timeout++;
+
+				// handle timeouts depending on current request seq
+				if (timeout >= 3) {
+					if (wp_request_seq < 0) // lost count packet
+						wp_count_sent = 0;
+					else
+						send_waypoint(pl_waypoints[wp_request_seq]);
+				}
+			}
+			
+			if (wp_count_sent == 0) {
+				send_waypoint_count(pl_waypoint_count);
+				wp_count_sent++;
+			}
+
+			// recv handlers will handle sending waypoints when requested
 			break;
 	}
-	//delay(100);
 
 	frames++;
 }
 
 // ************************
-// MAIN LOOP
+// MAIN SETUP AND LOOP
+
+void init_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, uint8_t cur,
+							mavlink_mission_item_t *waypoint) {
+	waypoint->param1 = 0;
+	waypoint->param2 = 0;
+	waypoint->param3 = 0;
+	waypoint->param4 = 0;
+	waypoint->x = lat;
+	waypoint->y = lon;
+	waypoint->z = alt;
+	waypoint->seq = seq;
+	waypoint->command = com;
+	waypoint->target_system = mav_system_id;
+	waypoint->target_component = mav_component_id;
+	waypoint->frame = MAV_FRAME_LOCAL_NED;
+	waypoint->current = cur;
+	waypoint->autocontinue = 1;
+
+	return waypoint;
+}
 
 void setup() {
 	pinMode(led_pin, OUTPUT);
 	Serial.begin(57600);
+
+	// Initialize the waypoint list
+	//   Modify the init_waypoints in the switch statement and NUM_WP to change waypoints
+	int i = 0;
+	mavlink_mission_item_t waypoint;
+	while (i < NUM_WP) {
+		switch (i) {
+			case 0:
+				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_TAKEOFF, &waypoint);
+				break;
+			case 1:
+				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_WAYPOINT, &waypoint);
+				break;
+			case 2:
+				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_LAND, &waypoint);
+				break;
+		}
+		pl_waypoints[i] = waypoint;
+	}
 }
 
 void loop() { 
-	// Received 5 heartbeats, connection confirmed
-	if (hb_count == 5) {
-		mavlink_connected = 1;
-	}
-
-	// If we don't hear from the mav for a while, assume we lost connection
-	static uint32_t loss = 0;
-	static int hb_last = hb_count;
-	if (hb_count == hb_last) {
-		loss++;
-		if (loss > 50000) {
-			mavlink_connected = 0;
-			digitalWrite(led_pin, LOW);
-			loss = 0;
-			hb_count = 0;
-		}
-	}
-	else {
-		loss = 0;
-		digitalWrite(led_pin, HIGH);
-	}
-	hb_last = hb_count;
-
-	// Do things if we are connected
-	if (mavlink_connected > 0)
-		pl_update();
+	// Carry out payload state machine
+	pl_update();
 	
 	// Receive messages and handle them
 	comm_receive();
@@ -167,17 +278,37 @@ void loop() {
 // MESSAGE RECEIVE HELPERS
 
 void comm_receive() {
+	static unsigned long last_time = millis();
+	static uint8_t timeout = 0;
 	int i = 0;
 	int frames = 0;
 	mavlink_message_t recv_msg; 
 	mavlink_status_t recv_status;
+
+	// block for 1 second on serial read
+	while (Serial.available() == 0 && pl_state != PL_STATE_DISCONNECTED) {
+		if (millis() - last_time >= 1000) {
+			last_time = millis();
+			timeout++; // block on serial read
+		}
+
+		// we haven't heard from the autopilot in 10 seconds
+		if (timeout >= 10) {
+			pl_state = PL_STATE_DISCONNECTED;
+			mavlink_connected = 0;
+			hb_count = 0;
+			wp_count_sent = 0;
+			wp_request_seq = -1;
+		}
+	}
 	
-	//receive data over serial 
-	while(Serial.available() > 0) { 
+	// receive data over serial 
+	while (Serial.available() > 0) { 
 		uint8_t c = Serial.read();
 
 		//try to get a new message 
 		if(mavlink_parse_char(0, c, &recv_msg, &recv_status)) { 
+			timeout = 0; // reset timeout
 			frames++;
 			
 			// Update system and component id
@@ -191,6 +322,12 @@ void comm_receive() {
 			        	break;
 				case MAVLINK_MSG_ID_MISSION_CURRENT:
 					handle_mission_current(&recv_msg);
+					break;
+				case MAVLINK_MSG_ID_MISSION_REQUEST:
+					handle_mission_request(&recv_msg);
+					break;
+				case MAVLINK_MSG_ID_MISSION_ACK:
+					handle_mission_ack(&recv_msg);
 					break;
 				default:
 				break;
@@ -214,5 +351,15 @@ void handle_heartbeat(mavlink_message_t *msg) {
 
 void handle_mission_current(mavlink_message_t *msg) {
 	mav_seq = mavlink_msg_mission_current_get_seq(msg);
-	pl_state = FLASH_LED;
+	pl_state = PL_STATE_FLASH_LED;
+}
+
+void handle_mission_request(mavlink_message_t *msg) {
+	wp_request_seq = mavlink_msg_mission_request_get_seq(msg);
+	send_waypoint(pl_waypoints[wp_request_seq]);
+}
+
+void handle_mission_ack(mavlink_message_t *msg) {
+	wp_request_seq = -1;
+	pl_state = PL_STATE_FLASH_LED;
 }
