@@ -17,6 +17,38 @@ FastSerialPort0(Serial); // Required for FastSerial
 int ledPin = A2;
 int received_heartbeat = 0;
 
+// System Status Variables
+uint8_t  mavlink_connected = 0;
+uint16_t hb_count = 0;
+uint32_t led_pin = A2;
+
+// *************************
+// MAVLINK MESSAGE VARIABLES
+
+// Heartbeat (msg id 1)
+uint32_t mav_custom_mode = 0;
+uint8_t  mav_type = 0;
+uint8_t  mav_autopilot = 0;
+uint8_t  mav_base_mode = 0;
+uint8_t  mav_system_status = 0;
+uint8_t  mav_mavlink_version = 0;
+
+// GPS Raw Int (msg id 24)
+int32_t  mav_latitude = 0;
+int32_t  mav_longitude = 0;
+int32_t  mav_altitude = 0;
+uint16_t mav_velocity = 0;
+uint8_t  mav_fix_type = 0;
+uint8_t  mav_sat_visible = 0;
+
+// VFR HUD (msg id 74)
+int32_t  mav_airspeed = 0;
+uint32_t mav_groundspeed = 0;
+uint32_t mav_altitude = 0;
+uint32_t mav_climb = 0;
+int16_t  mav_heading = 0;
+uint16_t mav_throttle = 0;
+
 void send_message(mavlink_message_t* msg) {
 	uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 
@@ -27,12 +59,7 @@ void send_message(mavlink_message_t* msg) {
 	}
 }
 
-void setup() {
-	pinMode(ledPin, OUTPUT);
-	Serial.begin(57600);
-}
-
-void loop() { 
+void send_heartbeat() {
 	// Define the system type (see mavlink_types.h for list of possible types) 
 	int system_type = MAV_TYPE_ONBOARD_CONTROLLER;
 	int autopilot_type = MAV_AUTOPILOT_GENERIC;
@@ -47,16 +74,26 @@ void loop() {
 	mavlink_msg_heartbeat_pack(PAYLOAD_SYSTEM_ID, component_id, &msg, system_type, autopilot_type, base_mode, 0, sys_status);
 	//mavlink_msg_mission_request_list_pack(PAYLOAD_SYSTEM_ID, component_id, &msg, MAV_TYPE_QUADROTOR, MAV_COMP_ID_ALL);
 
-	// Send the message (.write sends as bytes) 
-	delay(500);
-	if (received_heartbeat) {
+	send_message(&msg);
+}
+
+void setup() {
+	pinMode(ledPin, OUTPUT);
+	Serial.begin(57600);
+}
+
+void loop() { 
+	// Received 5 heartbeats, connection confirmed
+	if (hb_count > 5) {
+		mavlink_connected = 1;
 		digitalWrite(ledPin, HIGH);
-		send_message(&msg);
-		received_heartbeat = 0;
-		delay(500);
-		digitalWrite(ledPin, LOW);
 	}
+
+	// Do things if we are connected
+	if (mavlink_connected > 0)
+		send_heartbeat();
 	
+	// Receive messages and handle them
 	comm_receive();
 }
 
@@ -73,17 +110,10 @@ void comm_receive() {
 		//try to get a new message 
 		if(mavlink_parse_char(0, c, &recv_msg, &recv_status)) { 
 			frames++;
-			received_heartbeat = 1;
 			// Handle message
  			switch(recv_msg.msgid) {
 			        case MAVLINK_MSG_ID_HEARTBEAT:
-					mavlink_heartbeat_t hb;
-					mavlink_msg_heartbeat_decode(&recv_msg, &hb);
-					// do something with it
-
-					if (!received_heartbeat) {
-						received_heartbeat = 1;
-					}
+					hb_count++;
 			        	break;
 				case MAVLINK_MSG_ID_PARAM_VALUE:
 					break;
@@ -97,7 +127,5 @@ void comm_receive() {
 		}
 		delayMicroseconds(200);
 		i++;
-		// And get the next one
 	}
-	//delay(50);
 }
