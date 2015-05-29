@@ -3,7 +3,7 @@
   (general
     (links 26)
     (no_connects 0)
-    (area 201.341001 56.264999 254.999 131.401)
+    (area 203.989999 56.619999 252.350001 130.380001)
     (thickness 1.6)
     (drawings 6)
     (tracks 112)
@@ -14,7 +14,7 @@
 
   (page A4)
   (layers
-    (0 F.Cu signal hide)
+    (0 F.Cu signal)
     (31 B.Cu signal)
     (32 B.Adhes user)
     (33 F.Adhes user)
@@ -84,7 +84,7 @@
       (plotinvisibletext false)
       (padsonsilk false)
       (subtractmaskfromsilk false)
-      (outputformat 5)
+      (outputformat 1)
       (mirror false)
       (drillshape 0)
       (scaleselection 1)
@@ -3813,7 +3813,7 @@
       (net 17 "Net-(HEADER1-Pad9)"))
     (pad 10 smd oval (at 5.08 -1.27) (size 1.7272 1.7272) (layers F.Cu F.Paste F.Mask)
       (net 18 "Net-(HEADER1-Pad10)"))
-    (model Pin_Headers/Pin_Header_Straight_2x05.wrl
+    (model Pin_Headers.3dshapes/Pin_Header_Straight_2x05.wrl
       (at (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -3859,7 +3859,7 @@
       (net 15 GND))
     (pad 10 smd oval (at 5.08 -1.27) (size 1.7272 1.7272) (layers F.Cu F.Paste F.Mask)
       (net 16 +5V))
-    (model Pin_Headers/Pin_Header_Straight_2x05.wrl
+    (model Pin_Headers.3dshapes/Pin_Header_Straight_2x05.wrl
       (at (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -3904,9 +3904,9 @@
       (net 15 GND))
     (pad 9 thru_hole circle (at 7.874 -9.398 90) (size 2 2) (drill 0.2) (layers *.Cu *.Mask B.SilkS)
       (net 15 GND))
-    (model r_con_rj/rj45_tfn1_88p.wrl
-      (at (xyz 0 0 0))
-      (scale (xyz 1 1 1))
+    (model Connect.3dshapes/RJ45_8.wrl
+      (at (xyz 0 -0.25 0))
+      (scale (xyz 0.4 0.4 0.4))
       (rotate (xyz 0 0 0))
     )
   )

@@ -1,14 +1,14 @@
-(kicad_pcb (version 4) (host pcbnew "(after 2015-may-01 BZR unknown)-product")
+(kicad_pcb (version 4) (host pcbnew "(after 2015-mar-04 BZR unknown)-product")
 
   (general
     (links 50)
     (no_connects 0)
-    (area 195.317667 48.509 251.283 123.571002)
+    (area 200.219999 49.479999 248.580001 123.240001)
     (thickness 1.6)
     (drawings 4)
     (tracks 228)
     (zones 0)
-    (modules 14)
+    (modules 18)
     (nets 41)
   )
 
@@ -88,7 +88,7 @@
       (mirror false)
       (drillshape 0)
       (scaleselection 1)
-      (outputdirectory outputs/))
+      (outputdirectory ../outputs/))
   )
 
   (net 0 "")
@@ -180,6 +180,39 @@
     (add_net "Net-(J1-Pad6)")
     (add_net "Net-(J1-Pad7)")
     (add_net "Net-(J1-Pad8)")
+  )
+
+  (module Wire_Pads:SolderWirePad_single_1-2mmDrill (layer F.Cu) (tedit 556816D6) (tstamp 556817C6)
+    (at 245.11 115.57)
+    (fp_text reference Mount (at 0 1.27) (layer F.SilkS)
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (fp_text value Mount (at -1.905 3.175) (layer F.Fab) hide
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (pad 1 thru_hole circle (at 0 0) (size 3.50012 3.50012) (drill 1.19888) (layers *.Cu *.Mask F.SilkS))
+  )
+
+  (module Wire_Pads:SolderWirePad_single_1-2mmDrill (layer F.Cu) (tedit 556816D6) (tstamp 5568175C)
+    (at 203.581 115.57)
+    (fp_text reference Mount (at 0 1.27) (layer F.SilkS)
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (fp_text value Mount (at -1.905 3.175) (layer F.Fab) hide
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (pad 1 thru_hole circle (at 0 0) (size 3.50012 3.50012) (drill 1.19888) (layers *.Cu *.Mask F.SilkS))
+  )
+
+  (module Wire_Pads:SolderWirePad_single_1-2mmDrill (layer F.Cu) (tedit 556816D6) (tstamp 556816F6)
+    (at 203.581 57.15)
+    (fp_text reference Mount (at 0 1.27) (layer F.SilkS)
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (fp_text value Mount (at -1.905 3.175) (layer F.Fab) hide
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (pad 1 thru_hole circle (at 0 0) (size 3.50012 3.50012) (drill 1.19888) (layers *.Cu *.Mask F.SilkS))
   )
 
   (module quadcopter_footprints:logo_mirror (layer F.Cu) (tedit 0) (tstamp 555AE9D1)
@@ -3762,7 +3795,7 @@
     (model Pin_Headers.3dshapes/Pin_Header_Angled_2x05.wrl
       (at (xyz 0.05 -0.2 0))
       (scale (xyz 1 1 1))
-      (rotate (xyz 0 0 90))
+      (rotate (xyz 0 0 -90))
     )
   )
 
@@ -3866,7 +3899,7 @@
     (model Pin_Headers.3dshapes/Pin_Header_Angled_2x05.wrl
       (at (xyz 0.05 -0.2 0))
       (scale (xyz 1 1 1))
-      (rotate (xyz 0 0 90))
+      (rotate (xyz 0 0 -90))
     )
   )
 
@@ -3961,6 +3994,11 @@
       (net 13 "Net-(HEADER2-Pad3)"))
     (pad 16 smd rect (at -0.381 -1.6002) (size 0.44958 1.99898) (layers B.Cu B.Paste B.Mask)
       (net 15 "Net-(HEADER2-Pad5)"))
+    (model SMD_Packages.3dshapes/TQFP-32.wrl
+      (at (xyz -0.12 0.12 0))
+      (scale (xyz 1 1 1))
+      (rotate (xyz 0 0 0))
+    )
   )
 
   (module quadcopter_footprints:8mmMagnet locked (layer B.Cu) (tedit 54EBE0F4) (tstamp 5559819D)
@@ -4054,7 +4092,7 @@
       (net 12 "Net-(HEADER2-Pad2)"))
     (pad 10 smd oval (at 5.08 1.27) (size 1.7272 1.7272) (layers B.Cu B.Paste B.Mask)
       (net 31 "Net-(IC1-Pad14)"))
-    (model Pin_Headers/Pin_Header_Straight_2x05.wrl
+    (model Pin_Headers.3dshapes/Pin_Header_Straight_2x05.wrl
       (at (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -4100,7 +4138,7 @@
       (net 9 +5V))
     (pad 10 smd oval (at 5.08 1.27) (size 1.7272 1.7272) (layers B.Cu B.Paste B.Mask)
       (net 10 GND))
-    (model Pin_Headers/Pin_Header_Straight_2x05.wrl
+    (model Pin_Headers.3dshapes/Pin_Header_Straight_2x05.wrl
       (at (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -4145,9 +4183,9 @@
       (net 10 GND))
     (pad 9 thru_hole circle (at 7.874 9.398 270) (size 2 2) (drill 0.2) (layers *.Cu *.Mask F.SilkS)
       (net 10 GND))
-    (model r_con_rj/rj45_tfn1_88p.wrl
-      (at (xyz 0 0 0))
-      (scale (xyz 1 1 1))
+    (model Connect.3dshapes/RJ45_8.wrl
+      (at (xyz 0 -0.25 0))
+      (scale (xyz 0.4 0.4 0.4))
       (rotate (xyz 0 0 0))
     )
   )
@@ -7730,6 +7768,17 @@
       (xy 1.035789 -3.754606) (xy 1.038696 -3.735014) (xy 1.041258 -3.708342) (xy 1.046036 -3.670641)
       (xy 1.052992 -3.637892) (xy 1.059848 -3.617387) (xy 1.070443 -3.58518) (xy 1.072312 -3.558562)
       (xy 1.072312 -3.558562)) (layer F.Cu) (width 0.1))
+  )
+
+  (module Wire_Pads:SolderWirePad_single_1-2mmDrill (layer F.Cu) (tedit 556816D6) (tstamp 55680907)
+    (at 245.11 57.15)
+    (fp_text reference Mount (at 0 1.27) (layer F.SilkS)
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (fp_text value Mount (at -1.905 3.175) (layer F.Fab) hide
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (pad 1 thru_hole circle (at 0 0) (size 3.50012 3.50012) (drill 1.19888) (layers *.Cu *.Mask F.SilkS))
   )
 
   (gr_line (start 248.53 123.19) (end 200.27 123.19) (angle 90) (layer Edge.Cuts) (width 0.1))
