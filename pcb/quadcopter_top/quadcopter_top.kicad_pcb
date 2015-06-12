@@ -1,4 +1,4 @@
-(kicad_pcb (version 4) (host pcbnew "(after 2015-mar-04 BZR unknown)-product")
+(kicad_pcb (version 4) (host pcbnew "(after 2015-may-25 BZR unknown)-product")
 
   (general
     (links 50)
@@ -25,12 +25,12 @@
     (38 B.Mask user)
     (39 F.Mask user)
     (40 Dwgs.User user)
-    (41 Cmts.User user)
+    (41 Cmts.User user hide)
     (42 Eco1.User user hide)
     (43 Eco2.User user hide)
     (44 Edge.Cuts user)
     (45 Margin user)
-    (46 B.CrtYd user)
+    (46 B.CrtYd user hide)
     (47 F.CrtYd user)
     (48 B.Fab user hide)
     (49 F.Fab user hide)
@@ -65,7 +65,7 @@
     (grid_origin 200.66 123.19)
     (visible_elements FFFFFF7F)
     (pcbplotparams
-      (layerselection 0x00000_00000001)
+      (layerselection 0x00000_80000001)
       (usegerberextensions false)
       (excludeedgelayer true)
       (linewidth 0.100000)
@@ -84,7 +84,7 @@
       (plotinvisibletext false)
       (padsonsilk false)
       (subtractmaskfromsilk false)
-      (outputformat 1)
+      (outputformat 5)
       (mirror false)
       (drillshape 0)
       (scaleselection 1)
