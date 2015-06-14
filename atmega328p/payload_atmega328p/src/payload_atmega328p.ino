@@ -21,7 +21,7 @@ FastSerialPort0(Serial); // Required for FastSerial
 uint8_t  mavlink_connected = 0;
 uint8_t  pl_state = STANDBY;
 uint16_t hb_count = 0;
-uint32_t led_pin = A2;
+uint32_t led_pin = 13;
 
 // Payload identifiers
 uint8_t  pl_system_id = 0;
@@ -96,12 +96,12 @@ void pl_update() {
 	switch (pl_state) {
 		case STANDBY:
 			// Send command every so often
-			if (frames % 1000 == 0) {
+			//if (frames % 1000 == 0) {
 				send_set_waypoint(wp);
 				wp++;
 				if (wp > 3)
 					wp = 0;
-			}
+			//}
 			digitalWrite(led_pin, HIGH);
 			break;
 		case FLASH_LED:
