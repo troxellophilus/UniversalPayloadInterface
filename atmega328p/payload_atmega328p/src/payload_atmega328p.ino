@@ -36,6 +36,7 @@ uint8_t  mav_system_id = 0;
 uint8_t  mav_component_id = 0;
 
 // Waypoint Variables
+uint8_t  wp_clear_sent = 0;
 uint8_t  wp_count_sent = 0;
 uint8_t  wp_request_seq = -1;
 mavlink_mission_item_t pl_waypoints[NUM_WP];
@@ -177,7 +178,8 @@ void pl_update() {
 				delay(5000);
 
 				// clear out any waypoints already on the autopilot
-				send_clear_waypoints();
+				//send_clear_waypoints();
+				//wp_clear_sent = 1;
 
 				pl_state = PL_STATE_SEND_WAYPOINTS;
 			}
@@ -299,7 +301,6 @@ void comm_receive() {
 		if (millis() - last_time >= 1000) {
 			last_time = millis();
 			timeout++; // block on serial read
-			break;
 		}
 
 		// we haven't heard from the autopilot in 10 seconds
@@ -307,6 +308,7 @@ void comm_receive() {
 			pl_state = PL_STATE_DISCONNECTED;
 			mavlink_connected = 0;
 			hb_count = 0;
+			wp_clear_sent = 0;
 			wp_count_sent = 0;
 			wp_request_seq = -1;
 		}
