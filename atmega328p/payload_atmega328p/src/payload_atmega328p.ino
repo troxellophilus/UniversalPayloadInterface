@@ -203,17 +203,17 @@ void pl_update() {
 			static uint8_t last_seq = wp_request_seq;
 			static uint8_t timeout = 0;
 
-			if (wp_request_seq == last_seq && last_time - millis() >= 1000) {
+			if (wp_request_seq == last_seq && last_time - millis() >= 100) {
 				last_time = millis();
 				timeout++;
 
 				// handle timeouts depending on current request seq
 				if (timeout >= 5) {
-					if (wp_request_seq < 0) // lost count packet
-						wp_count_sent = 0;
-					else
-						send_waypoint(&pl_waypoints[wp_request_seq]);
+					wp_count_sent = 0;
 					timeout = 0;
+				}
+				else {
+					send_waypoint(&pl_waypoints[wp_request_seq]);
 				}
 			}
 			
