@@ -271,6 +271,7 @@ void setup() {
 				break;
 		}
 		pl_waypoints[i] = waypoint;
+		i++;
 	}
 }
 
@@ -298,6 +299,7 @@ void comm_receive() {
 		if (millis() - last_time >= 1000) {
 			last_time = millis();
 			timeout++; // block on serial read
+			break;
 		}
 
 		// we haven't heard from the autopilot in 10 seconds
