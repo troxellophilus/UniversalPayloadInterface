@@ -15,6 +15,8 @@
 #include <avr/pgmspace.h>
 #include "../AP_Common/AP_Common.h"
 
+#define prog_char char PROGMEM
+
 class BetterStream : public Stream {
 public:
         BetterStream(void) {

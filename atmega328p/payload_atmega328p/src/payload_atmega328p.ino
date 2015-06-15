@@ -206,7 +206,7 @@ void pl_update() {
 				timeout++;
 
 				// handle timeouts depending on current request seq
-				if (timeout >= 3) {
+				if (timeout >= 5) {
 					if (wp_request_seq < 0) // lost count packet
 						wp_count_sent = 0;
 					else
@@ -361,7 +361,7 @@ void handle_heartbeat(mavlink_message_t *msg) {
 
 void handle_mission_current(mavlink_message_t *msg) {
 	mav_seq = mavlink_msg_mission_current_get_seq(msg);
-	pl_state = PL_STATE_FLASH_LED;
+	//pl_state = PL_STATE_FLASH_LED;
 }
 
 void handle_mission_request(mavlink_message_t *msg) {
