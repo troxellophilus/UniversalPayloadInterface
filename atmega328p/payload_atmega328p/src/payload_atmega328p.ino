@@ -163,7 +163,7 @@ void pl_update() {
 			digitalWrite(led_pin, LOW);
 
 			// Received 10 heartbeats, connection confirmed
-			if (hb_count >= 10) {
+			if (hb_count >= 5) {
 				pl_state = PL_STATE_CONNECTED;
 			}
 
@@ -180,7 +180,6 @@ void pl_update() {
 				send_clear_waypoints();
 
 				pl_state = PL_STATE_SEND_WAYPOINTS;
-				wp_count_sent = 1;
 			}
 			break;
 		case PL_STATE_FLASH_LED:
