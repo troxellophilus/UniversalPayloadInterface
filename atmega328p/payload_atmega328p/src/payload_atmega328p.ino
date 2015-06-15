@@ -169,6 +169,10 @@ void pl_update() {
 				pl_state = PL_STATE_CONNECTED;
 			}
 
+			// send heartbeats from the payload
+			delay(100);
+			send_heartbeat();
+
 			// while a connection hasn't been established, do nothing
 			break;
 		case PL_STATE_CONNECTED:
@@ -185,9 +189,10 @@ void pl_update() {
 				pl_state = PL_STATE_SEND_WAYPOINTS;
 			}
 
-			// send heartbeats for the payload
-			if (frames % 200 == 0)
-				send_heartbeat();
+			// send heartbeats from the payload
+			delay(100);
+			send_heartbeat();
+
 			break;
 		case PL_STATE_FLASH_LED:
 			int i;
@@ -207,7 +212,7 @@ void pl_update() {
 			static unsigned long last_time = millis();
 			static uint8_t timeout = 0;
 
-			if (wp_count_sent && last_time - millis() >= 1000) {
+			if (wp_count_sent && millis() - last_time >= 1000) {
 				last_time = millis();
 				timeout++;
 
