@@ -263,13 +263,13 @@ void setup() {
 	while (i < NUM_WP) {
 		switch (i) {
 			case 0:
-				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_TAKEOFF, 1, &waypoint);
+				init_waypoint(1, 1, 9, i, MAV_CMD_NAV_TAKEOFF, 1, &waypoint);
 				break;
 			case 1:
-				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
+				init_waypoint(2, 2, 10, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
 				break;
 			case 2:
-				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_LAND, 0, &waypoint);
+				init_waypoint(3, 3, 11, i, MAV_CMD_NAV_LAND, 0, &waypoint);
 				break;
 		}
 		pl_waypoints[i] = waypoint;
