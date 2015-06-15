@@ -12,7 +12,7 @@
 
 #define PAYLOAD_SYSTEM_ID 101 // System ID for MAVlink packets
 
-#define NUM_WP 3 // the number of waypoints we will send to the mav
+#define NUM_WP 4 // the number of waypoints we will send to the mav
 
 #define PL_STATE_DISCONNECTED       0
 #define PL_STATE_CONNECTED          1
@@ -123,7 +123,7 @@ void send_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, 
 	waypoint.command = com;
 	waypoint.target_system = mav_system_id;
 	waypoint.target_component = mav_component_id;
-	waypoint.frame = MAV_FRAME_LOCAL_NED;
+	waypoint.frame = MAV_FRAME_GLOBAL;
 	waypoint.current = cur;
 	waypoint.autocontinue = 1;
 
@@ -203,7 +203,7 @@ void pl_update() {
 			static uint8_t last_seq = wp_request_seq;
 			static uint8_t timeout = 0;
 
-			if (wp_request_seq == last_seq && last_time - millis() >= 100) {
+			if (wp_request_seq == last_seq && last_time - millis() >= 1000) {
 				last_time = millis();
 				timeout++;
 
@@ -211,9 +211,6 @@ void pl_update() {
 				if (timeout >= 5) {
 					wp_count_sent = 0;
 					timeout = 0;
-				}
-				else {
-					send_waypoint(&pl_waypoints[wp_request_seq]);
 				}
 			}
 			
@@ -247,7 +244,7 @@ void init_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, 
 	waypoint->command = com;
 	waypoint->target_system = mav_system_id;
 	waypoint->target_component = mav_component_id;
-	waypoint->frame = MAV_FRAME_LOCAL_NED;
+	waypoint->frame = MAV_FRAME_GLOBAL;
 	waypoint->current = cur;
 	waypoint->autocontinue = 1;
 }
@@ -263,12 +260,15 @@ void setup() {
 	while (i < NUM_WP) {
 		switch (i) {
 			case 0:
-				init_waypoint(1, 1, 9, i, MAV_CMD_NAV_TAKEOFF, 1, &waypoint);
+				init_waypoint(0, 0, 8, i, MAV_CMD_NAV_WAYPOINT, 1, &waypoint);
 				break;
 			case 1:
-				init_waypoint(2, 2, 10, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
+				init_waypoint(1, 1, 9, i, MAV_CMD_NAV_TAKEOFF, 0, &waypoint);
 				break;
 			case 2:
+				init_waypoint(2, 2, 10, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
+				break;
+			case 3:
 				init_waypoint(3, 3, 11, i, MAV_CMD_NAV_LAND, 0, &waypoint);
 				break;
 		}
