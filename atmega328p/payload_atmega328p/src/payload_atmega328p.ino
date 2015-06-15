@@ -16,8 +16,8 @@
 
 #define PL_STATE_DISCONNECTED       0
 #define PL_STATE_CONNECTED          1
-#define PL_STATE_FLASH_LED          2
-#define PL_STATE_SEND_WAYPOINTS     3
+#define PL_STATE_SEND_WAYPOINTS     2
+#define PL_STATE_FLASH_LED          3
 
 FastSerialPort0(Serial); // Required for FastSerial
 
@@ -69,7 +69,6 @@ void send_heartbeat() {
 	// Define the system type (see mavlink_types.h for list of possible types) 
 	int system_type = MAV_TYPE_ONBOARD_CONTROLLER;
 	int autopilot_type = MAV_AUTOPILOT_GENERIC;
-	int component_id = 101; //MAV_COMP_ID_PAYLOAD;
 	int base_mode = MAV_MODE_FLAG_STABILIZE_ENABLED;
 	int sys_status = MAV_STATE_UNINIT;
 	
@@ -77,7 +76,7 @@ void send_heartbeat() {
 	mavlink_message_t msg; 
 	
 	// Setup the heartbeat message
-	mavlink_msg_heartbeat_pack(PAYLOAD_SYSTEM_ID, component_id, &msg, system_type, autopilot_type, base_mode, 0, sys_status);
+	mavlink_msg_heartbeat_pack(pl_system_id, pl_component_id, &msg, system_type, autopilot_type, base_mode, 0, sys_status);
 
 	send_message(&msg);
 }
@@ -132,6 +131,14 @@ void send_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, 
 	send_message(&msg);
 }
 
+void send_waypoint(mavlink_mission_item_t *wp) {
+	mavlink_message_t msg;
+
+	mavlink_msg_mission_item_encode(pl_system_id, pl_component_id, &msg, wp);
+
+	send_message(&msg);
+}
+
 void send_clear_waypoints() {
 	mavlink_message_t msg;
 	mavlink_mission_clear_all_t wp_clear;
@@ -156,7 +163,7 @@ void pl_update() {
 			digitalWrite(led_pin, LOW);
 
 			// Received 10 heartbeats, connection confirmed
-			if (hb_count == 10) {
+			if (hb_count >= 10) {
 				pl_state = PL_STATE_CONNECTED;
 			}
 
@@ -177,21 +184,22 @@ void pl_update() {
 			}
 			break;
 		case PL_STATE_FLASH_LED:
-			static int timer = 0;
+			int i;
 
-			if (frames % 50 == 0) {
+			// flash the LED 5 times in 1 second to visually acknowledge something
+			for (i = 0; i < 5; i++) {
 				if (digitalRead(led_pin) == HIGH)
 					digitalWrite(led_pin, LOW);
 				else
 					digitalWrite(led_pin, HIGH);
+				delay(200);
 			}
 
-			if (timer++ > 300)
-				pl_state = PL_STATE_CONNECTED;
+			pl_state = PL_STATE_CONNECTED;
 			break;
 		case PL_STATE_SEND_WAYPOINTS:
 			static unsigned long last_time = millis();
-			static uint8_t last_seq = 0;
+			static uint8_t last_seq = wp_request_seq;
 			static uint8_t timeout = 0;
 
 			if (wp_request_seq == last_seq && last_time - millis() >= 1000) {
@@ -203,14 +211,17 @@ void pl_update() {
 					if (wp_request_seq < 0) // lost count packet
 						wp_count_sent = 0;
 					else
-						send_waypoint(pl_waypoints[wp_request_seq]);
+						send_waypoint(&pl_waypoints[wp_request_seq]);
+					timeout = 0;
 				}
 			}
 			
 			if (wp_count_sent == 0) {
-				send_waypoint_count(pl_waypoint_count);
+				send_waypoint_count(NUM_WP);
 				wp_count_sent++;
 			}
+
+			last_seq = wp_request_seq;
 
 			// recv handlers will handle sending waypoints when requested
 			break;
@@ -238,8 +249,6 @@ void init_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, 
 	waypoint->frame = MAV_FRAME_LOCAL_NED;
 	waypoint->current = cur;
 	waypoint->autocontinue = 1;
-
-	return waypoint;
 }
 
 void setup() {
@@ -253,13 +262,13 @@ void setup() {
 	while (i < NUM_WP) {
 		switch (i) {
 			case 0:
-				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_TAKEOFF, &waypoint);
+				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_TAKEOFF, 1, &waypoint);
 				break;
 			case 1:
-				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_WAYPOINT, &waypoint);
+				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
 				break;
 			case 2:
-				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_LAND, &waypoint);
+				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_LAND, 0, &waypoint);
 				break;
 		}
 		pl_waypoints[i] = waypoint;
@@ -356,7 +365,7 @@ void handle_mission_current(mavlink_message_t *msg) {
 
 void handle_mission_request(mavlink_message_t *msg) {
 	wp_request_seq = mavlink_msg_mission_request_get_seq(msg);
-	send_waypoint(pl_waypoints[wp_request_seq]);
+	send_waypoint(&pl_waypoints[wp_request_seq]);
 }
 
 void handle_mission_ack(mavlink_message_t *msg) {
