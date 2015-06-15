@@ -10,7 +10,8 @@
 #define MAVLINK_COMM_NUM_BUFFERS 1
 #include <mavlink.h>
 
-#define PAYLOAD_SYSTEM_ID 101 // System ID for MAVlink packets
+#define PL_SYS_ID  101 // system id of the payload interface
+#define PL_COMP_ID 101 // Component id of payload interface
 
 #define NUM_WP 4 // the number of waypoints we will send to the mav
 
@@ -28,8 +29,8 @@ uint16_t hb_count = 0;
 uint32_t led_pin = 13;
 
 // Payload identifiers
-uint8_t  pl_system_id = 0;
-uint8_t  pl_component_id = 0;
+uint8_t  pl_system_id = PL_SYS_ID;
+uint8_t  pl_component_id = PL_COMP_ID;
 
 // APM identifiers
 uint8_t  mav_system_id = 0;
@@ -68,10 +69,10 @@ void send_message(mavlink_message_t* msg) {
 
 void send_heartbeat() {
 	// Define the system type (see mavlink_types.h for list of possible types) 
-	int system_type = MAV_TYPE_ONBOARD_CONTROLLER;
-	int autopilot_type = MAV_AUTOPILOT_GENERIC;
-	int base_mode = MAV_MODE_FLAG_STABILIZE_ENABLED;
-	int sys_status = MAV_STATE_UNINIT;
+	int system_type = MAV_TYPE_GCS;
+	int autopilot_type = MAV_AUTOPILOT_INVALID;
+	int base_mode = MAV_MODE_STABILIZE_ARMED;
+	int sys_status = MAV_STATE_ACTIVE;
 	
 	// Initialize the required buffers 
 	mavlink_message_t msg; 
@@ -164,7 +165,7 @@ void pl_update() {
 			digitalWrite(led_pin, LOW);
 
 			// Received 10 heartbeats, connection confirmed
-			if (hb_count >= 5) {
+			if (hb_count >= 10) {
 				pl_state = PL_STATE_CONNECTED;
 			}
 
@@ -183,6 +184,10 @@ void pl_update() {
 
 				pl_state = PL_STATE_SEND_WAYPOINTS;
 			}
+
+			// send heartbeats for the payload
+			if (frames % 200 == 0)
+				send_heartbeat();
 			break;
 		case PL_STATE_FLASH_LED:
 			int i;
@@ -200,10 +205,9 @@ void pl_update() {
 			break;
 		case PL_STATE_SEND_WAYPOINTS:
 			static unsigned long last_time = millis();
-			static uint8_t last_seq = wp_request_seq;
 			static uint8_t timeout = 0;
 
-			if (wp_request_seq == last_seq && last_time - millis() >= 1000) {
+			if (wp_count_sent && last_time - millis() >= 1000) {
 				last_time = millis();
 				timeout++;
 
@@ -212,14 +216,18 @@ void pl_update() {
 					wp_count_sent = 0;
 					timeout = 0;
 				}
+				else if (wp_request_seq >= 0) {
+					send_waypoint(&pl_waypoints[wp_request_seq]);
+				}
+				else {
+					send_waypoint_count(NUM_WP);
+				}
 			}
 			
 			if (wp_count_sent == 0) {
 				send_waypoint_count(NUM_WP);
 				wp_count_sent++;
 			}
-
-			last_seq = wp_request_seq;
 
 			// recv handlers will handle sending waypoints when requested
 			break;
@@ -244,7 +252,7 @@ void init_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, 
 	waypoint->command = com;
 	waypoint->target_system = mav_system_id;
 	waypoint->target_component = mav_component_id;
-	waypoint->frame = MAV_FRAME_GLOBAL;
+	waypoint->frame = MAV_FRAME_LOCAL_NED;
 	waypoint->current = cur;
 	waypoint->autocontinue = 1;
 }
@@ -260,16 +268,16 @@ void setup() {
 	while (i < NUM_WP) {
 		switch (i) {
 			case 0:
-				init_waypoint(0, 0, 8, i, MAV_CMD_NAV_WAYPOINT, 1, &waypoint);
+				init_waypoint(0, 0, 0, i, MAV_CMD_NAV_WAYPOINT, 1, &waypoint);
 				break;
 			case 1:
-				init_waypoint(1, 1, 9, i, MAV_CMD_NAV_TAKEOFF, 0, &waypoint);
+				init_waypoint(0, 0, 9, i, MAV_CMD_NAV_TAKEOFF, 0, &waypoint);
 				break;
 			case 2:
 				init_waypoint(2, 2, 10, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
 				break;
 			case 3:
-				init_waypoint(3, 3, 11, i, MAV_CMD_NAV_LAND, 0, &waypoint);
+				init_waypoint(2, 2, 0, i, MAV_CMD_NAV_LAND, 0, &waypoint);
 				break;
 		}
 		pl_waypoints[i] = waypoint;
