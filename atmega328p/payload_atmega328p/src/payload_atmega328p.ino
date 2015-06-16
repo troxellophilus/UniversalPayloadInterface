@@ -180,6 +180,13 @@ void pl_update() {
 			// Received 10 heartbeats, connection confirmed
 			if (hb_count >= 10) {
 				pl_state = PL_STATE_CONNECTED;
+
+				// update the target ids in the waypoint list
+				int i;
+				for (i = 0; i < NUM_WP; i++) {
+					pl_waypoints[i]->target_system = mav_system_id;
+					pl_waypoints[i]->target_component = mav_component_id;
+				}
 			}
 
 			// send heartbeats from the payload
@@ -271,7 +278,7 @@ void init_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, 
 	waypoint->target_component = mav_component_id;
 	waypoint->frame = MAV_FRAME_LOCAL_NED;
 	waypoint->current = cur;
-	waypoint->autocontinue = 1;
+	waypoint->autocontinue = 0;
 }
 
 void setup() {
