@@ -13,7 +13,7 @@
 #define PL_SYS_ID  101 // system id of the payload interface
 #define PL_COMP_ID 101 // Component id of payload interface
 
-#define NUM_WP 4 // the number of waypoints we will send to the mav
+#define NUM_WP 5 // the number of waypoints we will send to the mav
 
 #define PL_STATE_DISCONNECTED       0
 #define PL_STATE_CONNECTED          1
@@ -125,7 +125,7 @@ void send_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, 
 	waypoint.command = com;
 	waypoint.target_system = mav_system_id;
 	waypoint.target_component = mav_component_id;
-	waypoint.frame = MAV_FRAME_GLOBAL;
+	waypoint.frame = MAV_FRAME_BODY_NED;
 	waypoint.current = cur;
 	waypoint.autocontinue = 1;
 
@@ -273,9 +273,9 @@ void init_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, 
 	waypoint->command = com;
 	waypoint->target_system = mav_system_id;
 	waypoint->target_component = mav_component_id;
-	waypoint->frame = MAV_FRAME_GLOBAL;
+	waypoint->frame = MAV_FRAME_BODY_NED;
 	waypoint->current = cur;
-	waypoint->autocontinue = 0;
+	waypoint->autocontinue = 1;
 }
 
 void setup() {
@@ -289,15 +289,24 @@ void setup() {
 	while (i < NUM_WP) {
 		switch (i) {
 			case 0:
-				init_waypoint(123, 234, 0, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
+				// "Home" waypoint, gets overridden by APM
+				init_waypoint(0, 0, 0, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
 				break;
 			case 1:
-				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_TAKEOFF, 1, &waypoint);
+				// Takeoff, only cares about altitude param
+				init_waypoint(0, 0, 1.0, i, MAV_CMD_NAV_TAKEOFF, 0, &waypoint);
 				break;
 			case 2:
-				init_waypoint(123, 234, 20, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
-				break;
+				// Spin around a bit
+				init_waypoint(0, 0, 0, i, MAV_CMD_CONDITION_YAW, 0, &waypoint);
+				waypoint.param1 = 180.0; // degrees to spin
+				waypoint.param4 = 1.0; // around current rotation
 			case 3:
+				// Navigate according to body frame of reference
+				init_waypoint(0.0, 0.0, 1.0, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
+				break;
+			case 4:
+				// Return to launch, self explanatory
 				init_waypoint(0, 0, 0, i, MAV_CMD_NAV_RETURN_TO_LAUNCH, 0, &waypoint);
 				break;
 		}
