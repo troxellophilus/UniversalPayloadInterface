@@ -184,8 +184,8 @@ void pl_update() {
 				// update the target ids in the waypoint list
 				int i;
 				for (i = 0; i < NUM_WP; i++) {
-					pl_waypoints[i]->target_system = mav_system_id;
-					pl_waypoints[i]->target_component = mav_component_id;
+					pl_waypoints[i].target_system = mav_system_id;
+					pl_waypoints[i].target_component = mav_component_id;
 				}
 			}
 
