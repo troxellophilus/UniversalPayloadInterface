@@ -40,7 +40,7 @@ uint8_t  mav_component_id = 0;
 uint8_t  wp_timeout = 0;
 uint8_t  wp_clear_sent = 0;
 uint8_t  wp_count_sent = 0;
-uint8_t  wp_request_seq = -1;
+uint8_t  wp_request_seq = 0;
 mavlink_mission_item_t pl_waypoints[NUM_WP];
 
 // *************************
@@ -240,11 +240,8 @@ void pl_update() {
 					wp_count_sent = 0;
 					wp_timeout = 0;
 				}
-				else if (wp_request_seq >= 0) {
-					send_waypoint(&pl_waypoints[wp_request_seq]);
-				}
 				else {
-					send_waypoint_count(NUM_WP);
+					send_waypoint(&pl_waypoints[wp_request_seq]);
 				}
 			}
 			
@@ -276,7 +273,7 @@ void init_waypoint(float lat, float lon, float alt, uint16_t seq, uint16_t com, 
 	waypoint->command = com;
 	waypoint->target_system = mav_system_id;
 	waypoint->target_component = mav_component_id;
-	waypoint->frame = MAV_FRAME_LOCAL_NED;
+	waypoint->frame = MAV_FRAME_GLOBAL;
 	waypoint->current = cur;
 	waypoint->autocontinue = 0;
 }
@@ -292,10 +289,10 @@ void setup() {
 	while (i < NUM_WP) {
 		switch (i) {
 			case 0:
-				init_waypoint(123, 234, 0, i, MAV_CMD_NAV_WAYPOINT, 1, &waypoint);
+				init_waypoint(123, 234, 0, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
 				break;
 			case 1:
-				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_TAKEOFF, 0, &waypoint);
+				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_TAKEOFF, 1, &waypoint);
 				break;
 			case 2:
 				init_waypoint(123, 234, 20, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
@@ -342,7 +339,7 @@ void comm_receive() {
 			hb_count = 0;
 			wp_clear_sent = 0;
 			wp_count_sent = 0;
-			wp_request_seq = -1;
+			wp_request_seq = 0;
 		}
 	}
 	
@@ -405,6 +402,6 @@ void handle_mission_request(mavlink_message_t *msg) {
 }
 
 void handle_mission_ack(mavlink_message_t *msg) {
-	wp_request_seq = -1;
+	wp_request_seq = 0;
 	pl_state = PL_STATE_FLASH_LED;
 }
