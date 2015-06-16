@@ -37,6 +37,7 @@ uint8_t  mav_system_id = 0;
 uint8_t  mav_component_id = 0;
 
 // Waypoint Variables
+uint8_t  wp_timeout = 0;
 uint8_t  wp_clear_sent = 0;
 uint8_t  wp_count_sent = 0;
 uint8_t  wp_request_seq = -1;
@@ -153,6 +154,18 @@ void send_clear_waypoints() {
 	send_message(&msg);
 }
 
+void send_status_text(char * txt, MAV_SEVERITY severity) {
+	mavlink_message_t msg;
+	mavlink_statustext_t status_text;
+
+	status_text.severity = severity;
+	memcpy(status_text.text, txt, 50);
+
+	mavlink_msg_statustext_encode(mav_system_id, mav_component_id, &msg, &status_text);
+
+	send_message(&msg);
+}
+
 // ************************
 // PAYLOAD UPDATE FUNCTIONS
 
@@ -170,7 +183,7 @@ void pl_update() {
 			}
 
 			// send heartbeats from the payload
-			delay(100);
+			delay(10);
 			send_heartbeat();
 
 			// while a connection hasn't been established, do nothing
@@ -190,7 +203,7 @@ void pl_update() {
 			}
 
 			// send heartbeats from the payload
-			delay(100);
+			delay(10);
 			send_heartbeat();
 
 			break;
@@ -210,16 +223,15 @@ void pl_update() {
 			break;
 		case PL_STATE_SEND_WAYPOINTS:
 			static unsigned long last_time = millis();
-			static uint8_t timeout = 0;
 
-			if (wp_count_sent && millis() - last_time >= 1000) {
+			if (wp_count_sent && millis() - last_time >= 2000) {
 				last_time = millis();
-				timeout++;
+				wp_timeout++;
 
 				// handle timeouts depending on current request seq
-				if (timeout >= 5) {
+				if (wp_timeout >= 5) {
 					wp_count_sent = 0;
-					timeout = 0;
+					wp_timeout = 0;
 				}
 				else if (wp_request_seq >= 0) {
 					send_waypoint(&pl_waypoints[wp_request_seq]);
@@ -273,16 +285,16 @@ void setup() {
 	while (i < NUM_WP) {
 		switch (i) {
 			case 0:
-				init_waypoint(0, 0, 0, i, MAV_CMD_NAV_WAYPOINT, 1, &waypoint);
+				init_waypoint(123, 234, 0, i, MAV_CMD_NAV_WAYPOINT, 1, &waypoint);
 				break;
 			case 1:
-				init_waypoint(0, 0, 9, i, MAV_CMD_NAV_TAKEOFF, 0, &waypoint);
+				init_waypoint(0, 0, 10, i, MAV_CMD_NAV_TAKEOFF, 0, &waypoint);
 				break;
 			case 2:
-				init_waypoint(2, 2, 10, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
+				init_waypoint(123, 234, 20, i, MAV_CMD_NAV_WAYPOINT, 0, &waypoint);
 				break;
 			case 3:
-				init_waypoint(2, 2, 0, i, MAV_CMD_NAV_LAND, 0, &waypoint);
+				init_waypoint(0, 0, 0, i, MAV_CMD_NAV_RETURN_TO_LAUNCH, 0, &waypoint);
 				break;
 		}
 		pl_waypoints[i] = waypoint;
@@ -310,7 +322,7 @@ void comm_receive() {
 	mavlink_status_t recv_status;
 
 	// block for 1 second on serial read
-	while (Serial.available() == 0 && pl_state != PL_STATE_DISCONNECTED) {
+	while (Serial.available() == 0 && pl_state != PL_STATE_DISCONNECTED && pl_state != PL_STATE_SEND_WAYPOINTS) {
 		if (millis() - last_time >= 1000) {
 			last_time = millis();
 			timeout++; // block on serial read
@@ -380,6 +392,7 @@ void handle_mission_current(mavlink_message_t *msg) {
 }
 
 void handle_mission_request(mavlink_message_t *msg) {
+	wp_timeout = 0;
 	wp_request_seq = mavlink_msg_mission_request_get_seq(msg);
 	send_waypoint(&pl_waypoints[wp_request_seq]);
 }
