@@ -184,8 +184,8 @@ void pl_update() {
 				// update the target ids in the waypoint list
 				int i;
 				for (i = 0; i < NUM_WP; i++) {
-					pl_waypoints[i]->target_system = mav_system_id;
-					pl_waypoints[i]->target_component = mav_component_id;
+					pl_waypoints[i].target_system = mav_system_id;
+					pl_waypoints[i].target_component = mav_component_id;
 				}
 			}
 
@@ -329,7 +329,7 @@ void comm_receive() {
 	mavlink_status_t recv_status;
 
 	// block for 1 second on serial read
-	while (Serial.available() == 0 && pl_state != PL_STATE_DISCONNECTED && pl_state != PL_STATE_SEND_WAYPOINTS) {
+	while (Serial.available() == 0 && pl_state != PL_STATE_DISCONNECTED) {
 		if (millis() - last_time >= 1000) {
 			last_time = millis();
 			timeout++; // block on serial read
